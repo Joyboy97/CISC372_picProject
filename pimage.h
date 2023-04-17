@@ -17,6 +17,7 @@ typedef struct{
 	Image* srcImage;
 	Image* destImage;
 	Matrix* algorithm;
+	int chunk;
 } Convolutant;
 
 enum KernelTypes{EDGE=0,SHARPEN=1,BLUR=2,GAUSE_BLUR=3,EMBOSS=4,IDENTITY=5};

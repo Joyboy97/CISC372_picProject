@@ -62,7 +62,7 @@ void* convolute(void *input){
     int row,pix,bit,span;
 	Convolutant* convo=(Convolutant*)input;
     span=convo->srcImage->bpp*convo->srcImage->bpp;
-    for (row=0;row<convo->srcImage->height;row++){
+    for (row=0;row<convo->chunk;row++){
         for (pix=0;pix<convo->srcImage->width;pix++){
             for (bit=0;bit<convo->srcImage->bpp;bit++){
                 convo->destImage->data[Index(pix,row,convo->srcImage->width,bit,convo->srcImage->bpp)]=getPixelValue(convo->srcImage,pix,row,bit,*convo->algorithm);
@@ -101,7 +101,7 @@ int main(int argc,char** argv){
     t1=time(NULL);
     stbi_set_flip_vertically_on_load(0); 
     if (argc!=4) return Usage();
-	int i, bppchunk,procs=atoi(argv[3]);
+	int i, chunk,procs=atoi(argv[3]);
     char* fileName=argv[1];
 	printf("file name is %s do %s\n",fileName,argv[2]);
     if (!strcmp(argv[1],"pic4.jpg")&&!strcmp(argv[2],"gauss")){
@@ -115,23 +115,27 @@ int main(int argc,char** argv){
         printf("Error loading file %s.\n",fileName);
         return -1;
     }
-	if(srcImage.bpp>procs) procs=srcImage.bpp;
-	bppchunk=srcImage.bpp/procs;
+	if(srcImage.height<procs){
+		procs=srcImage.height;
+	}
+	chunk=srcImage.height/procs;
 
     destImage.bpp=srcImage.bpp;
     destImage.height=srcImage.height;
     destImage.width=srcImage.width;
     destImage.data=malloc(sizeof(uint8_t)*destImage.width*destImage.bpp*destImage.height);
-	
+
 	Convolutant *convo;
 	convo=malloc(sizeof(Convolutant));
-	//Convolutant *convo;
+//	Convolutant *convo;
 //	convo->srcImage=malloc(sizeof(struct *Image));
 	convo->srcImage=&srcImage;
 //	convo->destImage=malloc(sizeof(struct *Image));
 	convo->destImage=&destImage;
 //	convo->algorithm=malloc(sizeof(&algorithms[type]));
 	convo->algorithm=&algorithms[type];
+	convo->chunk=chunk;
+
 	t2=time(NULL);
 	printf("Took %ld seconds to get to convolute\n",t2-t1);
 	pthread_t tids[procs];
