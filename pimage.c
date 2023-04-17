@@ -62,7 +62,7 @@ void* convolute(void *input){
     int row,pix,bit,span;
 	Convolutant* convo=(Convolutant*)input;
     span=convo->srcImage->bpp*convo->srcImage->bpp;
-    for (row=0;row<convo->chunk;row++){
+    for (row=convo->procid*row<convo->chunk;row<(convo->procid+1)*convo->chunk;row++){
         for (pix=0;pix<convo->srcImage->width;pix++){
             for (bit=0;bit<convo->srcImage->bpp;bit++){
                 convo->destImage->data[Index(pix,row,convo->srcImage->width,bit,convo->srcImage->bpp)]=getPixelValue(convo->srcImage,pix,row,bit,*convo->algorithm);
@@ -143,7 +143,9 @@ int main(int argc,char** argv){
 	for (i =0;i<procs;i++){
 		pthread_attr_t attr;
 		pthread_attr_init(&attr);
+		convo->procid=i;
 		pthread_create(&tids[i],&attr,convolute,convo);
+		printf("%ld\n",tids[i]);
 	}
 	i=0;
 	for (i =0;i<procs;i++){
