@@ -68,7 +68,7 @@ void convolute(Image* srcImage,Image* destImage,Matrix algorithm,int procs){
 		int id,nthrds;
 		nthrds=omp_get_num_threads();
 		id=omp_get_thread_num();
-		for (row=id;row<chunk;row=row+nthrds){
+		for (row=id*nthrds;row<(id+1)*nthrds;row++){
 			for (pix=0;pix<srcImage->width;pix++){
 				for (bit=0;bit<srcImage->bpp;bit++){
 					#pragma omp critical
