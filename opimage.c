@@ -71,8 +71,8 @@ void convolute(Image* srcImage,Image* destImage,Matrix algorithm,int procs){
 		for (row=id*nthrds;row<(id+1)*nthrds;row++){
 			for (pix=0;pix<srcImage->width;pix++){
 				for (bit=0;bit<srcImage->bpp;bit++){
-					#pragma omp critical
-						destImage->data[Index(pix,row,srcImage->width,bit,srcImage->bpp)]=getPixelValue(srcImage,pix,row,bit,algorithm);
+					
+					destImage->data[Index(pix,row,srcImage->width,bit,srcImage->bpp)]=getPixelValue(srcImage,pix,row,bit,algorithm);
 				}
         		}
 		}
