@@ -2,8 +2,8 @@
 #include <stdint.h>
 #include <time.h>
 #include <string.h>
-#include "pimage.h"
-#include <pthread.h>
+#include "opimage.h"
+#include "omp.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -12,8 +12,7 @@
 #include "stb_image_write.h"
 
 //An array of kernel matrices to be used for image convolution.  
-//The indexes of these match the enumeration from the header file. ie.
-// algorithms[BLUR] returns the kernel corresponding to a box blur.
+//The indexes of these match the enumeration from the header file. ie. algorithms[BLUR] returns the kernel corresponding to a box blur.
 Matrix algorithms[]={
     {{0,-1,0},{-1,4,-1},{0,-1,0}},
     {{0,-1,0},{-1,5,-1},{0,-1,0}},
@@ -58,20 +57,26 @@ uint8_t getPixelValue(Image* srcImage,int x,int y,int bit,Matrix algorithm){
 //            destImage: A pointer to a  pre-allocated (including space for the pixel array) structure to receive the convoluted image.  It should be the same size as srcImage
 //            algorithm: The kernel matrix to use for the convolution
 //Returns: Nothing
-void* convolute(void *input){
+void convolute(Image* srcImage,Image* destImage,Matrix algorithm,int procs){
     int row,pix,bit,span;
-	Convolutant* convo=(Convolutant*)input;
-	int piece=convo->chunk;
-	int id=convo->procid;
-    span=convo->srcImage->bpp*convo->srcImage->bpp;
-    for (row=id*piece;row<(id+1)*piece;row++){
-        for (pix=0;pix<convo->srcImage->width;pix++){
-            for (bit=0;bit<convo->srcImage->bpp;bit++){
-                convo->destImage->data[Index(pix,row,convo->srcImage->width,bit,convo->srcImage->bpp)]=getPixelValue(convo->srcImage,pix,row,bit,*convo->algorithm);
-            }
-        }
-    }
-	pthread_exit(0);
+    span=srcImage->bpp*srcImage->bpp;
+	omp_set_num_threads(procs);
+	if(srcImage->height<procs) procs=srcImage->height;
+	int chunk=srcImage->height/procs;
+	#pragma omp parallel
+	{
+		int id,nthrds;
+		nthrds=omp_get_num_threads();
+		id=omp_get_thread_num();
+		for (row=id;row<chunk;row=row+nthrds){
+			for (pix=0;pix<srcImage->width;pix++){
+				for (bit=0;bit<srcImage->bpp;bit++){
+					#pragma omp critical
+						destImage->data[Index(pix,row,srcImage->width,bit,srcImage->bpp)]=getPixelValue(srcImage,pix,row,bit,algorithm);
+				}
+        		}
+		}
+	}
 }
 
 //Usage: Prints usage information for the program
@@ -99,64 +104,37 @@ enum KernelTypes GetKernelType(char* type){
 //Second is the lower case name of the algorithm.
 int main(int argc,char** argv){
     printf("You are in\n");
-    long t1,t2,t4,t3;
+    long t1,t2;
     t1=time(NULL);
+	double t4,t3;
     stbi_set_flip_vertically_on_load(0); 
     if (argc!=4) return Usage();
-	int i, chunk,procs=atoi(argv[3]);
     char* fileName=argv[1];
 	printf("file name is %s do %s\n",fileName,argv[2]);
     if (!strcmp(argv[1],"pic4.jpg")&&!strcmp(argv[2],"gauss")){
         printf("You have applied a gaussian filter to Gauss which has caused a tear in the time-space continum.\n");
     }
     enum KernelTypes type=GetKernelType(argv[2]);
-
-    Image srcImage,destImage,bwImage;
+	int procs=atoi(argv[3]);
+    Image srcImage,destImage,bwImage;   
     srcImage.data=stbi_load(fileName,&srcImage.width,&srcImage.height,&srcImage.bpp,0);
     if (!srcImage.data){
         printf("Error loading file %s.\n",fileName);
         return -1;
     }
-	if(srcImage.height<procs){
-		procs=srcImage.height;
-	}
-	chunk=srcImage.height/procs;
-
     destImage.bpp=srcImage.bpp;
     destImage.height=srcImage.height;
     destImage.width=srcImage.width;
     destImage.data=malloc(sizeof(uint8_t)*destImage.width*destImage.bpp*destImage.height);
-
-	Convolutant *convo;
-	convo=malloc(sizeof(Convolutant));
-//	Convolutant *convo;
-//	convo->srcImage=malloc(sizeof(struct *Image));
-	convo->srcImage=&srcImage;
-//	convo->destImage=malloc(sizeof(struct *Image));
-	convo->destImage=&destImage;
-//	convo->algorithm=malloc(sizeof(&algorithms[type]));
-	convo->algorithm=&algorithms[type];
-	convo->chunk=chunk;
-
-	t2=time(NULL);
+    	t2=time(NULL);
 	printf("Took %ld seconds to get to convolute\n",t2-t1);
-	pthread_t tids[procs];
-	for (i =0;i<procs;i++){
-		pthread_attr_t attr;
-		pthread_attr_init(&attr);
-		convo->procid=i;
-		pthread_create(&tids[i],&attr,convolute,convo);
-//		printf("%d\n",convo->procid*convo->chunk);
-	}
-
-	for (i =0;i<procs;i++){
-		pthread_join(tids[i],NULL);
-	}
-    //convolute(&srcImage,&destImage,algorithms[type]);
+	t3= omp_get_wtime();
+	convolute(&srcImage,&destImage,algorithms[type],procs);
     stbi_write_png("output.png",destImage.width,destImage.height,destImage.bpp,destImage.data,destImage.bpp*destImage.width);
     stbi_image_free(srcImage.data);
+    
     free(destImage.data);
-    t3=time(NULL);
-    printf("Took %ld seconds\n",t3-t1);
+	 t4= omp_get_wtime();
+    printf("Took %f seconds to finis\n",t4-t3);
    return 0;
 }
