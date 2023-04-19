@@ -2,7 +2,7 @@
 image:image.c image.h
 	gcc -g image.c -o image -lm
 clean:
-	rm -f image output.png pimage
+	rm -f image output.png pimage opimage
 pimage:pimage.c pimage.h
 	gcc -g pimage.c -o pimage -lm -pthread
 
