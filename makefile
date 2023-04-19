@@ -4,7 +4,7 @@ image:image.c image.h
 clean:
 	rm -f image output.png pimage opimage
 pimage:pimage.c pimage.h
-	gcc -g pimage.c -o pimage -lm -lthread
+	gcc -g pimage.c -o pimage -lm -pthread
 
 #export OMP_NUM_THREADS=4
 opimage:opimage.c opimage.h
