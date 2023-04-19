@@ -146,7 +146,7 @@ int main(int argc,char** argv){
 		pthread_attr_init(&attr);
 		convo->procid=i;
 		pthread_create(&tids[i],&attr,convolute,convo);
-//		printf("%d\n",convo->procid*convo->chunk);
+		printf("%d\n",convo->procid*convo->chunk);
 	}
 
 	for (i =0;i<procs;i++){
