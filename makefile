@@ -12,3 +12,6 @@ opimage:opimage.c opimage.h
 
 omp: testomp.c
 	gcc -g -fopenmp testomp.c -o omp
+pimagehpc: pimage.c pimage.h
+	gcc pimage.c -o pimage -pthread -lm
+	
