@@ -61,23 +61,22 @@ void convolute(Image* srcImage,Image* destImage,Matrix algorithm,int procs){
     int row,pix,bit,span;
     span=srcImage->bpp*srcImage->bpp;
 	omp_set_num_threads(procs);
-	if(srcImage->height<procs) procs=srcImage->height;
-	int chunk=srcImage->height/procs;
+//	if(srcImage->height<procs) procs=srcImage->height;
+//	int chunk=srcImage->height/procs;
 
-	{
-		int id,nthrds;
-		nthrds=omp_get_num_threads();
-		id=omp_get_thread_num();
-#pragma omp parallel for private(row,pix,bit)
-		for (row=id*nthrds;row<(id+1)*nthrds;row++){
+
+//	int id,nthrds;
+//	nthrds=omp_get_num_threads();
+//	id=omp_get_thread_num();
+	#pragma omp parallel for private(row,pix,bit)
+		for (row=0;row<srcImage->height;row++){
 			for (pix=0;pix<srcImage->width;pix++){
 				for (bit=0;bit<srcImage->bpp;bit++){
-					
-					destImage->data[Index(pix,row,srcImage->width,bit,srcImage->bpp)]=getPixelValue(srcImage,pix,row,bit,algorithm);
+				destImage->data[Index(pix,row,srcImage->width,bit,srcImage->bpp)]=getPixelValue(srcImage,pix,row,bit,algorithm);
 				}
         		}
 		}
-	}
+
 }
 
 //Usage: Prints usage information for the program

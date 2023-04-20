@@ -62,16 +62,18 @@ void* convolute(void *input){
     int row,pix,bit,span;
 	Convolutant* convo=(Convolutant*)input;
 	int piece=convo->chunk;
-	int id=convo->procid;
+	int *id=malloc(sizeof(int*));
+	*id=convo->procid;
+
     span=convo->srcImage->bpp*convo->srcImage->bpp;
-    for (row=id;row<convo->srcImage->height;row=row+piece){
+    for (row=*id;row<convo->srcImage->height;row=row+piece){
         for (pix=0;pix<convo->srcImage->width;pix++){
             for (bit=0;bit<convo->srcImage->bpp;bit++){
                 convo->destImage->data[Index(pix,row,convo->srcImage->width,bit,convo->srcImage->bpp)]=getPixelValue(convo->srcImage,pix,row,bit,*convo->algorithm);
             }
         }
     }
-	pthread_exit(0);
+	pthread_exit(id);
 }
 
 //Usage: Prints usage information for the program
@@ -146,11 +148,13 @@ int main(int argc,char** argv){
 		pthread_attr_init(&attr);
 		convo->procid=i;
 		pthread_create(&tids[i],&attr,convolute,convo);
-		printf("%d\n",convo->procid*convo->chunk);
+		printf("%d\n",convo->procid);
 	}
-
+	int *procid;
 	for (i =0;i<procs;i++){
-		pthread_join(tids[i],NULL);
+		pthread_join(tids[i],(void**)&procid);
+		printf("proc %d  exited \n",*procid);
+//		free(procid);
 	}
     //convolute(&srcImage,&destImage,algorithms[type]);
     stbi_write_png("poutput3.png",destImage.width,destImage.height,destImage.bpp,destImage.data,destImage.bpp*destImage.width);
