@@ -153,7 +153,7 @@ int main(int argc,char** argv){
 		pthread_join(tids[i],NULL);
 	}
     //convolute(&srcImage,&destImage,algorithms[type]);
-    stbi_write_png("output.png",destImage.width,destImage.height,destImage.bpp,destImage.data,destImage.bpp*destImage.width);
+    stbi_write_png("poutput.png",destImage.width,destImage.height,destImage.bpp,destImage.data,destImage.bpp*destImage.width);
     stbi_image_free(srcImage.data);
     free(destImage.data);
     t3=time(NULL);
