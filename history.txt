@@ -1,0 +1,71 @@
+    1  ls
+    2  cd ..
+    3  ls
+    4  cd home/~
+    5  cd ~
+    6  git clone https://gitlab.eecis.udel.edu/victoreu/studentdll.git
+    7  git clone git@gitlab.eecis.udel.edu:victoreu/studentdll.git
+    8  bg
+    9  ping gitlab.eecis.udel.edu
+   10  ip addr
+   11  ip route
+   12  trace route
+   13  traceroute
+   14  traceroute gitlab.eecis.udel.edu
+   15  traceroute googl.com
+   16  traceroute google.com
+   17  traceroute gitlab.eecis.udel.edu
+   18  ping catan.eecis.udel.edu
+   19  ping 128.4.20.201
+   20  ls
+   21  ssh-keygen
+   22  ls
+   23  cd .ssh
+   24  ls
+   25  nano authorized_keys
+   26  more id_rsa.pub
+   27  cd ..
+   28  git clone git@github.com:Joyboy97/CISC372_picProject.git
+   29  workgroup -g ea-cisc372
+   30  ls
+   31  cd CISC372_picProject
+   32  ls
+   33  nano makefile
+   34  make pimagehpc
+   35  nano makefile
+   36  make pimagehpc
+   37  vpkg_require gcc
+   38  make pimagehpc
+   39  nano makefile
+   40  make pimagehpc
+   41  git fetch
+   42  git pull
+   43  ./pimage pic2.jpg "edge" 12
+   44  git add -A
+   45  git commit -m "darwin (hpc) 12 procs"
+   46  git push
+   47  export OMP_NUM_THREADS=3
+   48  srun -h
+   49  srun opimage pic1.jpg "edge" 
+   50  srun opimage pic1.jpg "edge" 3
+   51  git add -A
+   52  git commit -m "omp from hpc"
+   53  git push
+   54  git remote
+   55  git remote -v
+   56  git config --global user.email "you@example.com"
+   57  git config --global user.name "Joyboy97"
+   58  git config --global user.email "victoreu@udel.edu"
+   59  git push
+   60  git config --global push.default matching
+   61  git push
+   62  git push origin main
+   63  git pull
+   64  git status
+   65  git add -A
+   66  git commit -m "hpc"
+   67  git push
+   68  echo history 1> history.txt
+   69  more history.txt
+   70  history
+   71  history 1> history.txt
