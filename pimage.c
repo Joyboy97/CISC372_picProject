@@ -66,7 +66,7 @@ void* convolute(void *input){
 	int id=convo->procid;
 
     span=convo->srcImage->bpp*convo->srcImage->bpp;
-    for (row=id;row<convo->srcImage->height;row=row+piece){
+    for (row=id*piece;row<(id+1)*piece;row++){
         for (pix=0;pix<convo->srcImage->width;pix++){
             for (bit=0;bit<convo->srcImage->bpp;bit++){
                 convo->destImage->data[Index(pix,row,convo->srcImage->width,bit,convo->srcImage->bpp)]=getPixelValue(convo->srcImage,pix,row,bit,*convo->algorithm);
