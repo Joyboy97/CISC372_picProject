@@ -62,18 +62,19 @@ void* convolute(void *input){
     int row,pix,bit,span;
 	Convolutant* convo=(Convolutant*)input;
 	int piece=convo->chunk;
-	int *id=malloc(sizeof(int*));
-	*id=convo->procid;
+	//int *id=malloc(sizeof(int*));
+	int id=convo->procid;
 
     span=convo->srcImage->bpp*convo->srcImage->bpp;
-    for (row=*id;row<convo->srcImage->height;row=row+piece){
+    for (row=id;row<convo->srcImage->height;row=row+piece){
         for (pix=0;pix<convo->srcImage->width;pix++){
             for (bit=0;bit<convo->srcImage->bpp;bit++){
                 convo->destImage->data[Index(pix,row,convo->srcImage->width,bit,convo->srcImage->bpp)]=getPixelValue(convo->srcImage,pix,row,bit,*convo->algorithm);
             }
         }
     }
-	pthread_exit(id);
+	pthread_exit(0);
+	//pthread_exit(id);
 }
 
 //Usage: Prints usage information for the program
@@ -128,32 +129,35 @@ int main(int argc,char** argv){
     destImage.height=srcImage.height;
     destImage.width=srcImage.width;
     destImage.data=malloc(sizeof(uint8_t)*destImage.width*destImage.bpp*destImage.height);
-
-	Convolutant *convo;
-	convo=malloc(sizeof(Convolutant));
+	
+	Convolutant *convo[procs];
+	for (i =0;i<procs;i++){
+		convo[i];
+		convo[i]=malloc(sizeof(Convolutant));
 //	Convolutant *convo;
 //	convo->srcImage=malloc(sizeof(struct *Image));
-	convo->srcImage=&srcImage;
+		convo[i]->srcImage=&srcImage;
 //	convo->destImage=malloc(sizeof(struct *Image));
-	convo->destImage=&destImage;
+		convo[i]->destImage=&destImage;
 //	convo->algorithm=malloc(sizeof(&algorithms[type]));
-	convo->algorithm=&algorithms[type];
-	convo->chunk=chunk;
-
+		convo[i]->algorithm=&algorithms[type];
+		convo[i]->chunk=chunk;
+	}
 	t2=time(NULL);
 	printf("Took %ld seconds to get to convolute\n",t2-t1);
 	pthread_t tids[procs];
 	for (i =0;i<procs;i++){
 		pthread_attr_t attr;
 		pthread_attr_init(&attr);
-		convo->procid=i;
-		pthread_create(&tids[i],&attr,convolute,convo);
-		printf("%d\n",convo->procid);
+		convo[i]->procid=i;
+		pthread_create(&tids[i],&attr,convolute,convo[i]);
+		printf("%d\n",convo[i]->procid);
 	}
 	int *procid;
 	for (i =0;i<procs;i++){
-		pthread_join(tids[i],(void**)&procid);
-		printf("proc %d  exited \n",*procid);
+		pthread_join(tids[i],NULL);
+//(void**)&procid);
+//		printf("proc %d  exited \n",*procid);
 //		free(procid);
 	}
     //convolute(&srcImage,&destImage,algorithms[type]);
